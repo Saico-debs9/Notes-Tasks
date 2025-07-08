@@ -1,81 +1,117 @@
 import React, { useState, useEffect } from 'react';
 import { fetchNotes, createNote, updateNote, deleteNote } from '../services/notesService';
-import { toast } from 'react-toastify';
+import { motion, AnimatePresence } from 'framer-motion';
+import '../styles/NotesPage.css';
 
 const NotesPage = () => {
   const [notes, setNotes] = useState([]);
-  const [form, setForm] = useState({ title: '', content: '' });
-  const [editId, setEditId] = useState(null);
-
-  const loadNotes = async () => {
-    try {
-      const res = await fetchNotes();
-      setNotes(res.data);
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load notes');
-    }
-  };
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ title: '', content: '', id: null });
 
   useEffect(() => {
     loadNotes();
   }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const loadNotes = async () => {
+    const res = await fetchNotes();
+    setNotes(res.data);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editId) {
-        await updateNote(editId, form);
-        toast.success('Note updated');
-      } else {
-        await createNote(form);
-        toast.success('Note created');
-      }
-      setForm({ title: '', content: '' });
-      setEditId(null);
-      loadNotes();
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Operation failed');
+  const handleAddClick = () => {
+    setFormData({ title: '', content: '', id: null });
+    setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.title.trim()) return alert('Title cannot be empty');
+    
+    if (formData.id) {
+      const updated = await updateNote(formData.id, formData);
+      setNotes(notes.map(n => n.id === updated.data.id ? updated.data : n));
+    } else {
+      const created = await createNote(formData);
+      setNotes([...notes, created.data]);
     }
+    setShowForm(false);
   };
 
   const handleEdit = (note) => {
-    setForm({ title: note.title, content: note.content });
-    setEditId(note.id);
+    setFormData(note);
+    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this note?')) return;
-    try {
+    if (window.confirm('Delete this note?')) {
       await deleteNote(id);
-      toast.success('Note deleted');
-      loadNotes();
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Delete failed');
+      setNotes(notes.filter(n => n.id !== id));
     }
   };
 
-  return (
-    <div>
-      <h2>Notes</h2>
-      <form onSubmit={handleSubmit}>
-        <input name="title" placeholder="Title" value={form.title} onChange={handleChange} required />
-        <textarea name="content" placeholder="Content" value={form.content} onChange={handleChange} />
-        <button type="submit">{editId ? 'Update' : 'Add'} Note</button>
-      </form>
+  const handleLongPress = (note) => {
+    handleDelete(note.id);
+  };
 
-      <ul>
-        {notes.map(note => (
-          <li key={note.id}>
-            <strong>{note.title}</strong>: {note.content}
-            <button onClick={() => handleEdit(note)}>Edit</button>
-            <button onClick={() => handleDelete(note.id)}>Delete</button>
-          </li>
+  const handleRightClick = (e, note) => {
+    e.preventDefault();
+    handleDelete(note.id);
+  };
+
+  return (
+    <div className="notes-container">
+      <div className="notes-grid">
+        {notes.map((note) => (
+          <div
+            key={note.id}
+            className="note-card"
+            onClick={() => handleEdit(note)}
+            onContextMenu={(e) => handleRightClick(e, note)}
+            onTouchStart={(e) => {
+              let timer = setTimeout(() => handleLongPress(note), 1000);
+              e.target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
+            }}
+          >
+            <h4>{note.title}</h4>
+            <p>{note.content}</p>
+          </div>
         ))}
-      </ul>
+      </div>
+
+      {/* Floating + button - confined within NotesPage only */}
+      <button className="add-note-btn" onClick={handleAddClick}>+</button>
+
+      {/* Fade-in form overlay */}
+      <AnimatePresence>
+        {showForm && (
+          <motion.div
+            className="note-form-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="note-form"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+            >
+              <input
+                placeholder="Title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
+              <textarea
+                placeholder="Content"
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              />
+              <div className="form-buttons">
+                <button className="save-btn" onClick={handleSave}>✔</button>
+                <button className="cancel-btn" onClick={() => setShowForm(false)}>✖</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.0.7:9089/api/notes'; // adjust to your backend IP
+const API_URL = `${process.env.REACT_APP_API_URL}/api/notes`; // adjust to your backend IP
 
 const getAuthHeader = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }

@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     due_date: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
   }, {
     timestamps: true,
