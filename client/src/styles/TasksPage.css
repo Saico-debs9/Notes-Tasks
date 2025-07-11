@@ -57,8 +57,7 @@
   height: 100%;
   background: rgba(0,0,0,0.4);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  /* justify-content: center; */
   z-index: 999;
 }
 
@@ -95,6 +94,17 @@
 
 .save-btn:hover {
   background: #45a049;
+}
+.subtasks {
+  margin-left: 20px;
+}
+
+.subtask-item {
+  display: flex;
+}
+
+.subtask-item input {
+  margin-right: 10px;
 }
 
 @media (max-width: 600px) {

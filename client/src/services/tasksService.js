@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = `${process.env.REACT_APP_API_URL}/api/tasks`; // adjust to your backend IP
+const API_URL = `${process.env.REACT_APP_API_URL}/api/tasks`;
 
 const getAuthHeader = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -17,3 +17,10 @@ export const updateTask = (id, task) =>
 
 export const deleteTask = (id) =>
   axios.delete(`${API_URL}/${id}/deleteTasks`, getAuthHeader());
+
+export const createSubtask = (task) => 
+  axios.post(`${API_URL}/createSubtask`, task, getAuthHeader());
+
+
+export const updateSubtask = (id, task) => 
+  axios.put(`${API_URL}/updateSubtask/${id}`, task, getAuthHeader());
