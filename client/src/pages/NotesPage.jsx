@@ -31,11 +31,6 @@ const NotesPage = () => {
     setNotes([...notes, created.data]);
     setShowForm(false);
   };
-  const handleEditChange = (id, field, value) => {
-    setNotes(notes.map(note =>
-      note.id === id ? { ...note, [field]: value } : note
-    ));
-  };
 const handleEdit = (noteId) => {
     setEditingNoteId(noteId);
   };

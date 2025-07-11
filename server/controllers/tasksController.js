@@ -1,4 +1,4 @@
-const { Tasks } = require('../models');
+const { Tasks, SubTasks } = require('../models');
 
 exports.createTask = async (req, res) => {
   const { title, due_date } = req.body;
@@ -12,7 +12,10 @@ exports.createTask = async (req, res) => {
 
 exports.getTasks = async (req, res) => {
   try {
-    const tasks = await Tasks.findAll({ where: { user_id: req.user.id } });
+    const tasks = await Tasks.findAll({
+       where: { user_id: req.user.id },
+       include: [{ model: SubTasks }] 
+      });
     res.json(tasks);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -25,7 +28,7 @@ exports.updateTask = async (req, res) => {
   try {
     const t = await Tasks.findOne({ where: { id, user_id: req.user.id } });
     if (!t) return res.status(404).json({ error: "Task not found" });
-    t.task = title;
+    t.title = title || t.title;
     t.due_date = due_date;
     t.is_done = is_done;
     await t.save();
@@ -44,4 +47,9 @@ exports.deleteTask = async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
+};
+exports.updateTaskStatus = async (taskId) => {
+  const subtasks = await SubTasks.findAll({ where: { task_id: taskId } });
+  const allDone = subtasks.every(st => st.is_done);
+  await Tasks.update({ is_done: allDone }, { where: { id: taskId } });
 };
