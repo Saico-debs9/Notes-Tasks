@@ -3,6 +3,7 @@ import {jwtDecode} from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 import { toast } from 'react-toastify';
+import '../styles/App.css';
 
 
 const LoginPage = () => {

@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => (
   <BrowserRouter>
-  <ToastContainer position="top-right" autoClose={5000} />
+  <ToastContainer position="top-right" autoClose={2000} />
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />

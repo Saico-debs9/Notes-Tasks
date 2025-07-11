@@ -6,7 +6,8 @@ import '../styles/NotesPage.css';
 const NotesPage = () => {
   const [notes, setNotes] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ title: '', content: '', id: null });
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [newNote, setNewNote] = useState({ title: '', content: '', id: null });
 
   useEffect(() => {
     loadNotes();
@@ -17,27 +18,37 @@ const NotesPage = () => {
     setNotes(res.data);
   };
 
-  const handleAddClick = () => {
-    setFormData({ title: '', content: '', id: null });
+  const handleAddClick = async () => {
+
+    setNewNote({ title: '', content: '' });
     setShowForm(true);
   };
 
-  const handleSave = async () => {
-    if (!formData.title.trim()) return alert('Title cannot be empty');
-    
-    if (formData.id) {
-      const updated = await updateNote(formData.id, formData);
-      setNotes(notes.map(n => n.id === updated.data.id ? updated.data : n));
-    } else {
-      const created = await createNote(formData);
-      setNotes([...notes, created.data]);
-    }
+  const handleSaveNewNote = async () => {
+    if (!newNote.title.trim()) return alert('Title cannot be empty');
+
+    const created = await createNote(newNote);
+    setNotes([...notes, created.data]);
     setShowForm(false);
   };
+  const handleEditChange = (id, field, value) => {
+    setNotes(notes.map(note =>
+      note.id === id ? { ...note, [field]: value } : note
+    ));
+  };
+const handleEdit = (noteId) => {
+    setEditingNoteId(noteId);
+  };
 
-  const handleEdit = (note) => {
-    setFormData(note);
-    setShowForm(true);
+  const handleEditSave = async (note) => {
+    if (!note.title.trim()) return alert('Title cannot be empty');
+    const updated = await updateNote(note.id, note);
+    setNotes(notes.map(n => n.id === updated.data.id ? updated.data : n));
+    setEditingNoteId(null);
+  };
+
+const handleNoteChange = (id, field, value) => {
+    setNotes(notes.map(n => n.id === id ? { ...n, [field]: value } : n));
   };
 
   const handleDelete = async (id) => {
@@ -63,23 +74,43 @@ const NotesPage = () => {
           <div
             key={note.id}
             className="note-card"
-            onClick={() => handleEdit(note)}
+            onClick={() => handleEdit(note.id)}
             onContextMenu={(e) => handleRightClick(e, note)}
             onTouchStart={(e) => {
               let timer = setTimeout(() => handleLongPress(note), 1000);
               e.target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
             }}
           >
-            <h4>{note.title}</h4>
-            <p>{note.content}</p>
+            {editingNoteId === note.id ? (
+              <>
+                <input
+                  value={note.title}
+                  onChange={(e) => handleNoteChange(note.id, 'title', e.target.value)}
+                />
+                <textarea
+                  value={note.content}
+                  onChange={(e) => handleNoteChange(note.id, 'content', e.target.value)}
+                />
+               <button
+                  className="save-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditSave(note);
+                  }}
+                >
+                  ✔
+                </button>
+              </>
+            ) : (
+              <>
+                <h4>{note.title}</h4>
+                <p>{note.content}</p>
+              </>
+            )}
           </div>
         ))}
       </div>
-
-      {/* Floating + button - confined within NotesPage only */}
       <button className="add-note-btn" onClick={handleAddClick}>+</button>
-
-      {/* Fade-in form overlay */}
       <AnimatePresence>
         {showForm && (
           <motion.div
@@ -96,16 +127,16 @@ const NotesPage = () => {
             >
               <input
                 placeholder="Title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                value={newNote.title}
+                onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
               />
               <textarea
                 placeholder="Content"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                value={newNote.content}
+                onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
               />
               <div className="form-buttons">
-                <button className="save-btn" onClick={handleSave}>✔</button>
+                <button className="save-btn" onClick={handleSaveNewNote}>✔</button>
                 <button className="cancel-btn" onClick={() => setShowForm(false)}>✖</button>
               </div>
             </motion.div>
@@ -115,5 +146,4 @@ const NotesPage = () => {
     </div>
   );
 };
-
 export default NotesPage;

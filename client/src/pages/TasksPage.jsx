@@ -69,7 +69,11 @@ const TasksPage = () => {
     }
   };
   const handleToggleDone = async (task) => {
-    const updated = await updateTask(task.id, { is_done: !task.is_done });
+    const updated = await updateTask(task.id, {
+      title: task.title,
+      due_date: task.due_date,
+      is_done: !task.is_done,
+    });
     setTasks(tasks.map(t => t.id === updated.data.id ? updated.data : t));
   };
   const handleLongPress = (task) => {
@@ -100,7 +104,7 @@ const TasksPage = () => {
               checked={task.is_done}
               onChange={() => handleToggleDone(task)}
             />
-            <h4>{task.task}</h4>
+            <h4>{task.title}</h4>
             <p>{task.due_date ? new Date(task.due_date).toLocaleString() : ''}</p>
           </div>
         ))}
@@ -138,6 +142,7 @@ const TasksPage = () => {
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
               />
               <button className="save-btn" onClick={handleSave}>✔</button>
+              <button className="cancel-btn" onClick={() => setShowForm(false)}>✖</button>
             </motion.div>
           </motion.div>
         )}

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/authService';
 import { toast } from 'react-toastify';
+import '../styles/App.css';
+
 
 
 const SignupPage = () => {
