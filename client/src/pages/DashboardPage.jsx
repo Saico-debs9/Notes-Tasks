@@ -26,10 +26,9 @@ const DashboardPage = () => {
 
   return (
     <div className="dashboard-container" {...handlers}>
-      <div>
-        <button onClick={handleLogout} className="logout-btn">Logout</button>
-      </div>
-      <div className="tab-buttons">
+      
+      <div className="top-bar">
+        <div className='tab-buttons'>
         <button
           className={activeTab === 'notes' ? 'active' : ''}
           onClick={() => setActiveTab('notes')}
@@ -42,6 +41,10 @@ const DashboardPage = () => {
         >
           Tasks
         </button>
+      </div>
+      <div className='logout-container'>
+        <button onClick={handleLogout} className='logout-btn'>Logout</button>
+      </div>
       </div>
 
       <div className="tab-content">
