@@ -23,9 +23,12 @@ form {
   min-height: 80vh;
   background-color: #f5f5f5;
 }
+.form-container button,input{
+  width: 100%;
+}
 
 input {
-  width: 100%;
+  /* width: 100%; */
   padding: 10px;
   margin: 8px 0;
   box-sizing: border-box;
@@ -36,7 +39,7 @@ input {
 }
 
 button {
-  width: 100%;
+  /* width: 100%; */
   padding: 10px;
   margin-top: 10px;
   background-color: #2c7be5;
@@ -50,18 +53,6 @@ button:hover {
   background-color: #1a68d1;
 }
 
-.logout-btn {
-  background-color: #e55353;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  cursor: pointer;
-  width: 9%;
-}
-
-.logout-btn:hover {
-  background-color: #c64040;
-}
 
 .link-container {
   text-align: center;

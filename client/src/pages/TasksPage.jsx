@@ -16,6 +16,18 @@ const TasksPage = () => {
     id: null
   });
   const subtaskRefs = useRef([]);
+  const [focusTaskId, setFocusTaskId] = useState(null);
+  const [focusSubtaskIdx, setFocusSubtaskIdx] = useState(null);
+
+  useEffect(() => {
+    if (focusTaskId && focusSubtaskIdx !== null) {
+      const ref = subtaskRefs.current[focusTaskId]?.[focusSubtaskIdx];
+      if (ref) ref.focus();
+      setFocusTaskId(null);
+      setFocusSubtaskIdx(null);
+    }
+  }, [tasks]);
+
 
   useEffect(() => {
     loadTasks();
@@ -24,16 +36,17 @@ const TasksPage = () => {
   const loadTasks = async () => {
     const res = await fetchTasks();
     const tasksWithSubtasks = res.data.map(t => ({
-    ...t,
-    Subtasks: t.Subtasks && t.Subtasks.length > 0
-      ? t.Subtasks
-      : [{ title: '', is_done: false }]
-  }));
+      ...t,
+      Subtasks: t.Subtasks && t.Subtasks.length > 0
+        ? t.Subtasks
+        : [{ title: '', is_done: false }]
+    }));
     setTasks(tasksWithSubtasks);
   };
 
   const handleAddClick = () => {
-    setFormData({ title: '', date: '', time: '', subtasks: [], id: null });
+    subtaskRefs.current = [];
+    setFormData({ title: '', date: '', time: '', subtasks: [{ title: '', is_done: false }], id: null });
     setShowForm(true);
   };
   const handleSave = async () => {
@@ -81,27 +94,42 @@ const TasksPage = () => {
     handleDelete(task.id);
   };
 
-  const handleSubtaskToggle = async (e, taskId, subtask) => {
-    e.stopPropagation();
-    await updateSubtask(subtask.id, {
-      title: subtask.title,
-      is_done: !subtask.is_done
-    });
+ const handleSubtaskToggle = async (e, taskId, subtask) => {
+  e.stopPropagation();
+  await updateSubtask(subtask.id, {
+    title: subtask.title,
+    is_done: !subtask.is_done
+  });
 
-    const updatedTask = tasks.find(t => t.id === taskId);
-    const allDone = updatedTask.Subtasks.every(s =>
-      s.id === subtask.id ? !s.is_done : s.is_done
-    );
+  const updatedTask = tasks.find(t => t.id === taskId);
+  const allDone = updatedTask.Subtasks.every(s =>
+    s.id === subtask.id ? !s.is_done : s.is_done
+  );
 
-    await updateTask(taskId, { is_done: allDone });
-    await loadTasks();
-  };
+  await updateTask(taskId, { is_done: allDone });
+  await loadTasks();
+};
 
-  const handleMainTaskToggle = async (e, task) => {
-    e.stopPropagation();
-    await updateTask(task.id, { is_done: !task.is_done });
-    await loadTasks();
-  };
+
+ const handleMainTaskToggle = async (e, task) => {
+  e.stopPropagation();
+  const newIsDone = !task.is_done;
+
+  await updateTask(task.id, { is_done: newIsDone });
+
+
+  for (const subtask of task.Subtasks) {
+    if (subtask.id) {
+      await updateSubtask(subtask.id, {
+        title: subtask.title,
+        is_done: newIsDone
+      });
+    }
+  }
+
+  await loadTasks();
+};
+
 
   const handleEditFieldChange = (taskId, field, value) => {
     setTasks(tasks.map(t => t.id === taskId ? { ...t, [field]: value } : t));
@@ -120,16 +148,14 @@ const TasksPage = () => {
     if (e.key === 'Enter') {
       e.preventDefault();
 
-      // Clone tasks to modify safely
       const updatedTasks = [...tasks];
 
-      // Find task index in state
       const taskIndex = updatedTasks.findIndex(t => t.id === taskId);
       if (taskIndex === -1) return;
 
       const task = updatedTasks[taskIndex];
 
-      // Save current subtask if needed
+
       const currentSub = task.Subtasks[idx];
       if (currentSub.title.trim()) {
         if (!currentSub.id) {
@@ -151,14 +177,16 @@ const TasksPage = () => {
         }
       }
 
-      // Append a new empty subtask to UI state
-      task.Subtasks.push({ title: '', is_done: false });
 
-      // Update the state
+      task.Subtasks.push({ title: '', is_done: false });
       updatedTasks[taskIndex] = task;
       setTasks(updatedTasks);
 
-      // Focus the new input field after rendering
+      setFocusTaskId(taskId);
+      setFocusSubtaskIdx(task.Subtasks.length - 1);
+
+
+
       setTimeout(() => {
         const newIdx = task.Subtasks.length - 1;
         if (!subtaskRefs.current[taskId]) subtaskRefs.current[taskId] = [];
@@ -168,28 +196,6 @@ const TasksPage = () => {
       }, 0);
     }
   };
-
-
-  // const handleSubtaskChange = (e, taskId, index) => {
-  //   const newTasks = tasks.map(t => {
-  //     if (t.id === taskId) {
-  //       const updatedSubtasks = [...t.Subtasks];
-  //       updatedSubtasks[index].title = e.target.value;
-  //       return { ...t, Subtasks: updatedSubtasks };
-  //     }
-  //     return t;
-  //   });
-  //   setTasks(newTasks);
-  // };
-  // const handleTaskFieldChange = (e, taskId) => {
-  //   const newTasks = tasks.map(t => {
-  //     if (t.id === taskId) {
-  //       return { ...t, title: e.target.value };
-  //     }
-  //     return t;
-  //   });
-  //   setTasks(newTasks);
-  // };
 
 
 
@@ -229,18 +235,27 @@ const TasksPage = () => {
               e.target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
             }}
           >
+            <div className='task-main-checkbox'>
             <input
               type="checkbox"
               checked={task.is_done}
               onChange={(e) => handleMainTaskToggle(e, task)}
             />
+            
             {editingTask === task.id ? (
-              <>
                 <input
                   type="text"
                   value={task.title}
+                  className = "task-title-input"
                   onChange={(e) => handleEditFieldChange(task.id, 'title', e.target.value)}
                 />
+                ) : (
+                  <span className="task-title">{task.title}</span>
+              )}
+              </div>
+              {editingTask === task.id && (
+                <>
+             
                 <div className="subtasks">
                   {(task.Subtasks || []).map((subtask, idx) => (
                     <div key={subtask.id || idx} className="subtask-item">
@@ -263,33 +278,6 @@ const TasksPage = () => {
                   ))}
                 </div>
                 <button onClick={() => handleSaveEdit(task)}>Save</button>
-              </>
-            ) : (
-              <>
-                <h4>{task.title}</h4>
-                <p>{task.due_date ? new Date(task.due_date).toLocaleString() : ''}</p>
-                <div className="subtasks">
-                  {task.Subtasks.map((subtask, idx) => (
-                    <div key={subtask.id || idx} className="subtask-item">
-                      <input
-                        type="checkbox"
-                        checked={subtask.is_done}
-                        onChange={() => handleSubtaskToggle(task.id, idx)}
-                      />
-                      <input
-                        type="text"
-                        value={subtask.title}
-                        onChange={(e) => handleSubtaskEditChange(task.id, idx, e.target.value)}
-                        onKeyDown={(e) => handleSubtaskKeyDown(e, task.id, idx)}
-                        ref={el => {
-                          if (!subtaskRefs.current[task.id]) subtaskRefs.current[task.id] = [];
-                          subtaskRefs.current[task.id][idx] = el;
-                        }}
-                      />
-                    </div>
-                  ))}
-
-                </div>
               </>
             )}
           </div>
@@ -336,31 +324,40 @@ const TasksPage = () => {
                       placeholder="Subtask title"
                       value={subtask.title}
                       onChange={(e) => {
-                        const updated = [...formData.subtasks];
-                        updated[idx].title = e.target.value;
-                        setFormData({ ...formData, subtasks: updated });
+                        const value = e.target.value;
+                        setFormData(prevFormData => {
+                          const updatedSubtasks = prevFormData.subtasks.map((s, i) => {
+                            if (i === idx) {
+                              return { ...s, title: value };
+                            }
+                            return s;
+                          });
+                          return { ...prevFormData, subtasks: updatedSubtasks };
+                        });
                       }}
+
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          setFormData({ ...formData, subtasks: [...formData.subtasks, { title: '', is_done: false }] });
-                          setTimeout(() => subtaskRefs.current[idx + 1]?.focus(), 0);
+                          setFormData(prev => {
+                            const newSubtasks = [...prev.subtasks, { title: '', is_done: false }];
+                            return { ...prev, subtasks: newSubtasks };
+                          });
+
+                          setTimeout(() => {
+                            const ref = subtaskRefs.current[idx + 1];
+                            if (ref && typeof ref.focus === "function") ref.focus();
+                          }, 100);
                         }
                       }}
-                      ref={el => subtaskRefs.current[idx] = el}
+
+                      ref={el => {
+                        if (el) subtaskRefs.current[idx] = el;
+                      }}
                     />
                   </div>
                 ))}
-                {formData.subtasks.length === 0 && (
-                  <div className="subtask-form-item">
-                    <input
-                      type="text"
-                      placeholder="Subtask title"
-                      value=""
-                      onChange={(e) => setFormData({ ...formData, subtasks: [{ title: e.target.value, is_done: false }] })}
-                    />
-                  </div>
-                )}
+
               </div>
               <button className="save-btn" onClick={handleSave}>✔</button>
               <button className="cancel-btn" onClick={() => setShowForm(false)}>✖</button>

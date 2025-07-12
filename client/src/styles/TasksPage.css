@@ -1,37 +1,102 @@
-/* TasksPage.css */
+/* ======== TasksPage.css ======== */
+
+:root {
+  --primary-color: #4CAF50;
+  --primary-hover: #45a049;
+  --background-color: #f9f9f9;
+  --card-background: #ffffff;
+  --text-color: #333;
+  --border-radius: 8px;
+}
+
+body {
+  background-color: var(--background-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
+}
 
 .tasks-container {
   position: relative;
   padding: 20px;
   min-height: 100vh;
-  background: #f9f9f9;
+  background: var(--background-color);
   overflow-y: auto;
 }
 
 .tasks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 15px;
 }
 
 .task-card {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   padding: 15px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .task-card:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.task-card h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.task-card p {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.task-card input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.subtasks {
+  width: 100%;
+}
+.tasks-grid button{
+  margin-left: 81%;
+}
+
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 4px 20px; /* indentation for subtasks */
+}
+
+.subtask-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
+.subtask-item input[type="text"] {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fafafa;
 }
 
 .add-task-btn {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  background: #4CAF50;
+  background: var(--primary-color);
   color: white;
   font-size: 30px;
   border: none;
@@ -45,7 +110,7 @@
 }
 
 .add-task-btn:hover {
-  background: #45a049;
+  background: var(--primary-hover);
 }
 
 /* Modal overlay */
@@ -57,56 +122,69 @@
   height: 100%;
   background: rgba(0,0,0,0.4);
   display: flex;
-  /* justify-content: center; */
+  justify-content: center;
+  align-items: center;
   z-index: 999;
 }
 
 /* Modal form */
 .task-form {
-  background: white;
+  background: var(--card-background);
   padding: 25px;
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.task-form input {
+.task-form input[type="text"],
+.task-form input[type="date"],
+.task-form input[type="time"] {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 14px;
+  width: 100%;
 }
 
-.save-btn {
+.save-btn, .cancel-btn {
   align-self: flex-end;
-  background: #4CAF50;
+  background: var(--primary-color);
   color: white;
   border: none;
   padding: 8px 15px;
   border-radius: 5px;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
 }
 
+.cancel-btn {
+  background: #888;
+  margin-left: 10px;
+}
+
 .save-btn:hover {
-  background: #45a049;
-}
-.subtasks {
-  margin-left: 20px;
+  background: var(--primary-hover);
 }
 
-.subtask-item {
-  display: flex;
+.cancel-btn:hover {
+  background: #666;
 }
 
-.subtask-item input {
-  margin-right: 10px;
+/* Subtasks form styling in modal */
+.subtasks-form .subtask-form-item input[type="text"] {
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fafafa;
 }
 
+/* Responsive adjustments */
 @media (max-width: 600px) {
   .tasks-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -117,4 +195,15 @@
     height: 50px;
     font-size: 24px;
   }
+}
+.task-main-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.task-title {
+  font-size: 16px;
+  font-weight: 500;
 }
