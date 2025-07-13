@@ -18,6 +18,8 @@ const TasksPage = () => {
   const subtaskRefs = useRef([]);
   const [focusTaskId, setFocusTaskId] = useState(null);
   const [focusSubtaskIdx, setFocusSubtaskIdx] = useState(null);
+  const [tempDate, setTempDate] = useState('');
+  const [tempTime, setTempTime] = useState('');
 
   useEffect(() => {
     if (focusTaskId && focusSubtaskIdx !== null) {
@@ -38,7 +40,7 @@ const TasksPage = () => {
     const tasksWithSubtasks = res.data.map(t => ({
       ...t,
       Subtasks: t.Subtasks && t.Subtasks.length > 0
-        ? t.Subtasks
+        ? t.Subtasks.sort((a, b) => a.id - b.id)
         : [{ title: '', is_done: false }]
     }));
     setTasks(tasksWithSubtasks);
@@ -50,7 +52,7 @@ const TasksPage = () => {
     setShowForm(true);
   };
   const handleSave = async () => {
-    if (!formData.title.trim()) return alert('Task cannot be empty');
+    if (!formData.title.trim()) return alert('Task title cannot be empty');
 
     const due_date = formData.date && formData.time
       ? `${formData.date} ${formData.time}:00`
@@ -94,41 +96,41 @@ const TasksPage = () => {
     handleDelete(task.id);
   };
 
- const handleSubtaskToggle = async (e, taskId, subtask) => {
-  e.stopPropagation();
-  await updateSubtask(subtask.id, {
-    title: subtask.title,
-    is_done: !subtask.is_done
-  });
+  const handleSubtaskToggle = async (e, taskId, subtask) => {
+    e.stopPropagation();
+    await updateSubtask(subtask.id, {
+      title: subtask.title,
+      is_done: !subtask.is_done
+    });
 
-  const updatedTask = tasks.find(t => t.id === taskId);
-  const allDone = updatedTask.Subtasks.every(s =>
-    s.id === subtask.id ? !s.is_done : s.is_done
-  );
+    const updatedTask = tasks.find(t => t.id === taskId);
+    const allDone = updatedTask.Subtasks.every(s =>
+      s.id === subtask.id ? !s.is_done : s.is_done
+    );
 
-  await updateTask(taskId, { is_done: allDone });
-  await loadTasks();
-};
-
-
- const handleMainTaskToggle = async (e, task) => {
-  e.stopPropagation();
-  const newIsDone = !task.is_done;
-
-  await updateTask(task.id, { is_done: newIsDone });
+    await updateTask(taskId, { is_done: allDone });
+    await loadTasks();
+  };
 
 
-  for (const subtask of task.Subtasks) {
-    if (subtask.id) {
-      await updateSubtask(subtask.id, {
-        title: subtask.title,
-        is_done: newIsDone
-      });
+  const handleMainTaskToggle = async (e, task) => {
+    e.stopPropagation();
+    const newIsDone = !task.is_done;
+
+    await updateTask(task.id, { is_done: newIsDone });
+
+
+    for (const subtask of task.Subtasks) {
+      if (subtask.id) {
+        await updateSubtask(subtask.id, {
+          title: subtask.title,
+          is_done: newIsDone
+        });
+      }
     }
-  }
 
-  await loadTasks();
-};
+    await loadTasks();
+  };
 
 
   const handleEditFieldChange = (taskId, field, value) => {
@@ -236,26 +238,60 @@ const TasksPage = () => {
             }}
           >
             <div className='task-main-checkbox'>
-            <input
-              type="checkbox"
-              checked={task.is_done}
-              onChange={(e) => handleMainTaskToggle(e, task)}
-            />
-            
-            {editingTask === task.id ? (
+              <input
+                type="checkbox"
+                checked={task.is_done}
+                onChange={(e) => handleMainTaskToggle(e, task)}
+              />
+
+              {editingTask === task.id ? (
                 <input
                   type="text"
                   value={task.title}
-                  className = "task-title-input"
+                  className="task-title-input"
                   onChange={(e) => handleEditFieldChange(task.id, 'title', e.target.value)}
                 />
-                ) : (
-                  <span className="task-title">{task.title}</span>
+              ) : (
+                <span className="task-title">{task.title}</span>
               )}
-              </div>
-              {editingTask === task.id && (
-                <>
-             
+            </div>
+            {editingTask === task.id && (
+              <>
+                <input
+                  type="date"
+                  min={new Date().toISOString().split('T')[0]}
+                  value={tempDate ||(task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[0] : '')}
+                  onChange={(e) => {
+                    setTempDate(e.target.value);
+                  }}
+                  onBlur={(e) => {
+                    
+                    const newDate = e.target.value;
+                    const today = new Date().toISOString().split('T')[0];
+
+                    if(newDate<today){
+                      alert("Date cannot be in the past");
+                      setTempDate('');
+                      return;
+                    }
+                    const existingTime = task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[1].slice(0, 5) : '00:00';
+                    handleEditFieldChange(task.id, 'due_date', `${newDate} ${existingTime}:00`);
+                    setTempDate('');
+                  }}
+                />
+                <input
+                  type="time"
+                  value={tempTime || (task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[1].slice(0, 5) : '')}
+                  onChange={(e) => {
+                    setTempTime(e.target.value);
+                  }}
+                  onBlur={(e) => {
+                    const newTime = e.target.value;
+                    const existingDate = task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[0] : '';
+                    handleEditFieldChange(task.id, 'due_date', `${existingDate} ${newTime}:00`);
+                  }}
+                />
+
                 <div className="subtasks">
                   {(task.Subtasks || []).map((subtask, idx) => (
                     <div key={subtask.id || idx} className="subtask-item">
@@ -279,6 +315,7 @@ const TasksPage = () => {
                 </div>
                 <button onClick={() => handleSaveEdit(task)}>Save</button>
               </>
+
             )}
           </div>
         ))}
@@ -307,6 +344,7 @@ const TasksPage = () => {
               />
               <input
                 type="date"
+                min={new Date().toISOString().split('T')[0]}
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               />
@@ -359,8 +397,10 @@ const TasksPage = () => {
                 ))}
 
               </div>
-              <button className="save-btn" onClick={handleSave}>✔</button>
-              <button className="cancel-btn" onClick={() => setShowForm(false)}>✖</button>
+              <div className='form-buttons'>
+                <button className="save-btn" onClick={handleSave}>✔</button>
+                <button className="cancel-btn" onClick={() => setShowForm(false)}>✖</button>
+              </div>
             </motion.div>
           </motion.div>
         )}

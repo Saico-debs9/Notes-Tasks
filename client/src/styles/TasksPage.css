@@ -113,7 +113,6 @@ body {
   background: var(--primary-hover);
 }
 
-/* Modal overlay */
 .task-form-overlay {
   position: fixed;
   top: 0;
@@ -127,7 +126,7 @@ body {
   z-index: 999;
 }
 
-/* Modal form */
+
 .task-form {
   background: var(--card-background);
   padding: 25px;
@@ -174,7 +173,6 @@ body {
   background: #666;
 }
 
-/* Subtasks form styling in modal */
 .subtasks-form .subtask-form-item input[type="text"] {
   padding: 8px;
   font-size: 14px;
@@ -184,7 +182,20 @@ body {
   background: #fafafa;
 }
 
-/* Responsive adjustments */
+.form-buttons {
+  display: flex;
+  justify-content: center; 
+  gap: 10px; 
+  margin-top: 10px; 
+}
+
+.form-buttons button {
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+
+
 @media (max-width: 600px) {
   .tasks-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
