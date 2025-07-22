@@ -20,6 +20,29 @@ const TasksPage = () => {
   const [focusSubtaskIdx, setFocusSubtaskIdx] = useState(null);
   const [tempDate, setTempDate] = useState('');
   const [tempTime, setTempTime] = useState('');
+  const [alertedTasks, setAlertedTasks] = useState({});
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+
+      tasks.forEach((task) => {
+        if (!task.is_done && task.due_date) {
+          const due = new Date(task.due_date);
+
+          if (due <= now) {
+            if (!alertedTasks[task.id]) {
+              alert(`Task "${task.title}" is due!`);
+              setAlertedTasks(prev => ({ ...prev, [task.id]: true }));
+            }
+          }
+        }
+      });
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [tasks, alertedTasks]);
+
 
   useEffect(() => {
     if (focusTaskId && focusSubtaskIdx !== null) {
@@ -29,11 +52,10 @@ const TasksPage = () => {
       setFocusSubtaskIdx(null);
     }
   }, [tasks]);
-
-
   useEffect(() => {
     loadTasks();
   }, []);
+
 
   const loadTasks = async () => {
     const res = await fetchTasks();
@@ -53,10 +75,14 @@ const TasksPage = () => {
   };
   const handleSave = async () => {
     if (!formData.title.trim()) return alert('Task title cannot be empty');
+    if (formData.time && !formData.date) {
+      return alert('Please select a date when adding a time.');
+    }
 
     const due_date = formData.date && formData.time
-      ? `${formData.date} ${formData.time}:00`
+      ? `${formData.date} ${formData.time}:00+05:30`
       : null;
+
 
     const payload = {
       title: formData.title,
@@ -259,35 +285,35 @@ const TasksPage = () => {
               <>
                 <input
                   type="date"
-                  min={new Date().toISOString().split('T')[0]}
-                  value={tempDate ||(task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[0] : '')}
+                  min={new Date().toLocaleDateString('en-CA').split('T')[0]}
+                  value={tempDate || (task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toLocaleDateString('en-CA').split('T')[0] : '')}
                   onChange={(e) => {
                     setTempDate(e.target.value);
                   }}
                   onBlur={(e) => {
-                    
-                    const newDate = e.target.value;
-                    const today = new Date().toISOString().split('T')[0];
 
-                    if(newDate<today){
+                    const newDate = e.target.value;
+                    const today = new Date().toLocaleDateString('en-CA').split('T')[0];
+
+                    if (newDate < today) {
                       alert("Date cannot be in the past");
                       setTempDate('');
                       return;
                     }
-                    const existingTime = task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[1].slice(0, 5) : '00:00';
+                    const existingTime = task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toLocaleDateString('en-CA').split('T')[1].slice(0, 5) : '00:00';
                     handleEditFieldChange(task.id, 'due_date', `${newDate} ${existingTime}:00`);
                     setTempDate('');
                   }}
                 />
                 <input
                   type="time"
-                  value={tempTime || (task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[1].slice(0, 5) : '')}
+                  value={tempTime || (task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toLocaleTimeString('en-GB', { hour12: false }).slice(0, 5) : '')}
                   onChange={(e) => {
                     setTempTime(e.target.value);
                   }}
                   onBlur={(e) => {
                     const newTime = e.target.value;
-                    const existingDate = task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toISOString().split('T')[0] : '';
+                    const existingDate = task.due_date && !isNaN(new Date(task.due_date)) ? new Date(task.due_date).toLocaleTimeString('en-GB', { hour12: false }).slice(0, 5) : '';
                     handleEditFieldChange(task.id, 'due_date', `${existingDate} ${newTime}:00`);
                   }}
                 />
@@ -344,7 +370,7 @@ const TasksPage = () => {
               />
               <input
                 type="date"
-                min={new Date().toISOString().split('T')[0]}
+                min={new Date().toLocaleDateString('en-CA').split('T')[0]}
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               />
