@@ -3,12 +3,13 @@ import {jwtDecode} from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 import { toast } from 'react-toastify';
-import '../styles/App.css';
+import '../styles/Login.css';
 
 
 const LoginPage = () => {
   const [form, setForm] = useState({ username: '', password: '' });
   const navigate = useNavigate();
+  const [shake, setShake] = useState(false);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,20 +38,22 @@ const LoginPage = () => {
       toast.success('Logged in successfully');
     } catch (err) {
       console.log(err);
+      setShake(true);
+      setTimeout(()=>setShake(false), 500);
       toast.error(err.response?.data?.error || 'Login failed');
     }
   };
 
   return (
     
-    <div className='form-container'>
+    <div className='login-page'>
      
-      <div>
+      <div className='login-card'>
         
-
-        <form onSubmit={handleSubmit}>
-          <input name="username" placeholder="Username" onChange={handleChange} />
-          <input name="password" placeholder="Password" type="password" onChange={handleChange} />
+      <h2>Login</h2>
+        <form onSubmit={handleSubmit} className='login-form'>
+          <input name="username" placeholder="Username" onChange={handleChange} className={shake ? 'shake' : ''} />
+          <input name="password" placeholder="Password" type="password" onChange={handleChange} className={shake ? 'shake' : ''} />
           <button type="submit">Login</button>
           <div className='link-container'><span>New here?</span><a className="link" href="/signup">Signin</a>
           </div>

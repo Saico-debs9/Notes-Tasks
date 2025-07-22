@@ -24,12 +24,13 @@ body {
 }
 
 .tasks-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .task-card {
+  width: 100%;
   background: var(--card-background);
   border-radius: var(--border-radius);
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);

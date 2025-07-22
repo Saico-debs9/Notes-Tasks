@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/authService';
 import { toast } from 'react-toastify';
-import '../styles/App.css';
+import '../styles/Signup.css';
 
 
 
@@ -25,11 +25,12 @@ const SignupPage = () => {
   };
 
   return (
-    <div className='form-container'>
+    <div className='signin-page'>
      
-      <div>
+      <div className='signin-card'>
+        <h2>SignUp</h2>
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='signin-form'>
         <input name="username" placeholder="Username" onChange={handleChange} />
         <input name="password" placeholder="Password" type="password" onChange={handleChange} />
         <button type="submit">Signup</button>
