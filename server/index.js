@@ -1,5 +1,5 @@
 const express = require('express');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const { sequelize } = require('./models');
 
 const app = express();
@@ -30,14 +30,14 @@ app.use('/api/tasks', tasksRoutes);
 const port = process.env.PORT || 9089;
 
 
-
+app.listen(port, '0.0.0.0', () => {
+      console.log(`Backend running on ${port}`);
+    });
 
 sequelize.sync()
   .then(() => {
     console.log("Database synced successfully");
-    app.listen(port, '0.0.0.0', () => {
-      console.log(`Backend running on ${port}`);
-    });
+    
   })
   .catch(err => {
     console.error('Database sync error:', err);
