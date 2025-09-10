@@ -30,16 +30,21 @@ app.use('/api/tasks', tasksRoutes);
 
 
 
-const port = process.env.PORT || 9089;
 
 
-app.listen(port, '0.0.0.0', () => {
-      console.log(`Backend running on ${port}`);
-    });
+app.get("/", (req, res) => {
+  res.send("Backend is alive!");
+});
+
+
 
 sequelize.sync()
   .then(() => {
     console.log("Database synced successfully");
+    const port = process.env.PORT || 5000;
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Backend running on ${port}`);
+    });
     
   })
   .catch(err => {
