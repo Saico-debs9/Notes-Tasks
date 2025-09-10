@@ -3,14 +3,17 @@ require('dotenv').config();
 const { sequelize } = require('./models');
 
 const app = express();
-const cors = require('cors');
-app.use(
-  cors({
-    origin: ["https://notes-tasks-nu.vercel.app"], // your frontend domain
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://notes-tasks-nu.vercel.app");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200); // respond immediately to preflight
+  }
+  next();
+});
 
 app.use(express.json());
 app.options("*", cors());
