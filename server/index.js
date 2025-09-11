@@ -24,7 +24,7 @@ async function startServer() {
     await sequelize.sync(); 
     console.log("Database synced");
     app.listen(process.env.PORT, '0.0.0.0', () => {
-      console.log(`Backend running on http://localhost:${process.env.PORT}`);
+      console.log(`Backend running on ${process.env.PORT}`);
     });
   } catch (error) {
     console.error("Database error:", error);
