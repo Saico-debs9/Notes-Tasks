@@ -61,18 +61,7 @@
 .login-form button:hover {
   background: #2563eb;
 }
-.google-button{
-width: 100%;
-  padding: 12px;
-  background: #3b82f6;
-  border: none;
-  color: white;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s;
-  box-sizing: border-box;
-}
+
 
 .link-container {
   margin-top: 15px;
