@@ -9,6 +9,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    googleId: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
   }, {
     timestamps: true,
   });
