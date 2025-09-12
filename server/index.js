@@ -21,7 +21,7 @@ app.get('/', (req, res) => res.send('Backend is alive!'));
 async function startServer() {
   try {
    
-    await sequelize.sync(); 
+    await sequelize.sync({alter: true}); 
     console.log("Database synced");
     app.listen(process.env.PORT, '0.0.0.0', () => {
       console.log(`Backend running on ${port}`);
