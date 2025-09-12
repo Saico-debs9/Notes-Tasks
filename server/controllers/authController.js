@@ -42,7 +42,7 @@ exports.googleLogin = async (req, res) => {
     if (!user) {
       console.log("👤 No user found, creating new one...");
       user = await User.create({
-        email,
+        username: email,
         googleId,
         name,
         password: null,
