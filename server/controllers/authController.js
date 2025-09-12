@@ -37,11 +37,11 @@ exports.googleLogin = async (req, res) => {
     }
 
     // 🔎 Check if user already exists
-    let user = await User.findOne({ where: { email } });
+    let user = await Users.findOne({ where: { email } });
 
     if (!user) {
       console.log("👤 No user found, creating new one...");
-      user = await User.create({
+      user = await Users.create({
         username: email,
         googleId,
         name,
