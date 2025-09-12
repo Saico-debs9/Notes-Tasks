@@ -37,7 +37,7 @@ exports.googleLogin = async (req, res) => {
     }
 
     // 🔎 Check if user already exists
-    let user = await Users.findOne({ where: { email } });
+    let user = await Users.findOne({ where: { username: email } });
 
     if (!user) {
       console.log("👤 No user found, creating new one...");
@@ -48,7 +48,7 @@ exports.googleLogin = async (req, res) => {
         password: null,
       });
     } else {
-      console.log("👤 Existing user found:", user.email);
+      console.log("👤 Existing user found:", user.username);
     }
     const token = jwt.sign(
   { id: user.id, email: user.email },
