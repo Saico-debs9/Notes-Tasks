@@ -37,21 +37,21 @@ exports.googleLogin = async (req, res) => {
     }
 
     // 🔎 Check if user already exists
-    let user = await User.findOne({ where: { email } });
+    let user = await Users.findOne({ where: { username: email } });
 
     if (!user) {
       console.log("👤 No user found, creating new one...");
-      user = await User.create({
-        email,
+      user = await Users.create({
+        username: email,
         googleId,
         name,
         password: null,
       });
     } else {
-      console.log("👤 Existing user found:", user.email);
+      console.log("👤 Existing user found:", user.username);
     }
     const token = jwt.sign(
-  { id: user.id, email: user.email },
+  { id: user.id, username: user.username },
   process.env.JWT_SECRET,
   { expiresIn: "30m" }
 );
@@ -61,7 +61,7 @@ exports.googleLogin = async (req, res) => {
       token,
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         name: user.name,
       },
     });

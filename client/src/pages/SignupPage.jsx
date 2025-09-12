@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/authService';
 import { toast } from 'react-toastify';
 import '../styles/Signup.css';
-
+import GoogleLoginButton from '../components/GoogleLoginButton'
 
 
 const SignupPage = () => {
@@ -35,6 +35,7 @@ const SignupPage = () => {
         <input name="password" placeholder="Password" type="password" onChange={handleChange} />
         <button type="submit">Signup</button>
         <div className='link-container'><span>Already have an account?</span><a className="link" href="/login">Login</a>
+          <GoogleLoginButton />
         </div>
 
       </form>

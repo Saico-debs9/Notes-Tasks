@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 import { toast } from 'react-toastify';
 import '../styles/Login.css';
+import GoogleLoginButton from '../components/GoogleLoginButton'
 
 
 const LoginPage = () => {
@@ -55,7 +56,8 @@ const LoginPage = () => {
           <input name="username" placeholder="Username" onChange={handleChange} className={shake ? 'shake' : ''} />
           <input name="password" placeholder="Password" type="password" onChange={handleChange} className={shake ? 'shake' : ''} />
           <button type="submit">Login</button>
-          <div className='link-container'><span>New here?</span><a className="link" href="/signup">Signin</a>
+          <div className='link-container'><span>New here? Test</span><a className="link" href="/signup">Signin</a>
+            <GoogleLoginButton />
           </div>
         </form>
 
