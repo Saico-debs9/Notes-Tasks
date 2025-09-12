@@ -51,7 +51,7 @@ exports.googleLogin = async (req, res) => {
       console.log("👤 Existing user found:", user.username);
     }
     const token = jwt.sign(
-  { id: user.id, email: user.email },
+  { id: user.id, username: user.username },
   process.env.JWT_SECRET,
   { expiresIn: "30m" }
 );
@@ -61,7 +61,7 @@ exports.googleLogin = async (req, res) => {
       token,
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         name: user.name,
       },
     });
