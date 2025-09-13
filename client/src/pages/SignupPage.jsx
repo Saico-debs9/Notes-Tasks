@@ -34,7 +34,7 @@ const SignupPage = () => {
         <input name="username" placeholder="Username" onChange={handleChange} />
         <input name="password" placeholder="Password" type="password" onChange={handleChange} />
         <button type="submit">Signup</button>
-        <div className='link-container'><span>Already have an account?</span><a className="link" href="/login">Login</a>
+        <div className='link-container'><span>Already SignedIn?</span><a className="link" href="/login">Login</a>
           <GoogleLoginButton />
         </div>
 
