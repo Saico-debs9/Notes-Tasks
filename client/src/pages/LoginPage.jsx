@@ -57,9 +57,8 @@ const LoginPage = () => {
           <input name="password" placeholder="Password" type="password" onChange={handleChange} className={shake ? 'shake' : ''} />
           <button type="submit">Login</button>
           <div className='link-container'><span>New here? Test</span><a className="link" href="/signup">Signin</a>
-            
+            <GoogleLoginButton />
           </div>
-          <div className='google-button'><GoogleLoginButton /></div>
         </form>
 
       </div>
